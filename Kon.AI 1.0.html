@@ -1,0 +1,310 @@
+<!DOCTYPE html>
+<html lang="tr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Kon.AI 1.0</title>
+    <style>
+        /* --- GENEL AYARLAR --- */
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background-color: #f0f2f5;
+            margin: 0;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            height: 100vh;
+            overflow: hidden;
+        }
+
+        #splash-screen {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background-color: #000;
+            color: #fff;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            z-index: 9999;
+            font-size: 3rem;
+            font-weight: bold;
+            letter-spacing: 5px;
+            animation: fadeOut 2.5s forwards;
+            pointer-events: none;
+        }
+
+        @keyframes fadeOut {
+            0% { opacity: 1; }
+            70% { opacity: 1; }
+            100% { opacity: 0; visibility: hidden; }
+        }
+
+        .chat-container {
+            width: 100%;
+            max-width: 400px;
+            height: 90vh;
+            background-color: #fff;
+            border-radius: 20px;
+            box-shadow: 0 10px 25px rgba(0,0,0,0.1);
+            display: flex;
+            flex-direction: column;
+            overflow: hidden;
+            position: relative;
+        }
+
+        .chat-header {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            padding: 15px;
+            text-align: center;
+            font-size: 1.2rem;
+            font-weight: bold;
+            box-shadow: 0 2px 5px rgba(0,0,0,0.1);
+        }
+
+        .status-dot {
+            height: 10px;
+            width: 10px;
+            background-color: #00ff00;
+            border-radius: 50%;
+            display: inline-block;
+            margin-right: 5px;
+        }
+
+        #coin-counter {
+            font-size: 0.9rem;
+            margin-top: 5px;
+            color: #ffd700;
+        }
+
+        #chat-window {
+            flex: 1;
+            padding: 20px;
+            overflow-y: auto;
+            display: flex;
+            flex-direction: column;
+            gap: 15px;
+            background-color: #f9f9f9;
+        }
+
+        .message {
+            max-width: 80%;
+            padding: 12px 16px;
+            border-radius: 15px;
+            font-size: 0.95rem;
+            line-height: 1.4;
+            animation: popIn 0.3s ease;
+        }
+
+        @keyframes popIn {
+            from { transform: scale(0.8); opacity: 0; }
+            to { transform: scale(1); opacity: 1; }
+        }
+
+        .bot-msg { background-color: #e4e6eb; color: #000; align-self: flex-start; border-bottom-left-radius: 2px; }
+        .user-msg { background-color: #0084ff; color: white; align-self: flex-end; border-bottom-right-radius: 2px; }
+
+        .typing-indicator { font-style: italic; color: #888; font-size: 0.8rem; margin-left: 10px; display: none; }
+
+        .input-area { padding: 15px; background-color: #fff; border-top: 1px solid #ddd; display: flex; gap: 10px; }
+        input[type="text"] { flex: 1; padding: 12px; border: 1px solid #ddd; border-radius: 25px; outline: none; transition: border 0.3s; }
+        input[type="text"]:focus { border-color: #764ba2; }
+        button { background-color: #764ba2; color: white; border: none; padding: 10px 20px; border-radius: 25px; cursor: pointer; font-weight: bold; transition: background 0.3s; }
+        button:hover { background-color: #5b3a82; }
+    </style>
+</head>
+<body>
+
+    <div id="splash-screen">Kon.AI</div>
+
+    <div class="chat-container">
+        <div class="chat-header">
+            <span class="status-dot"></span>Kon.AI 1.0
+            <div id="coin-counter">Kalan Coin: 30</div>
+        </div>
+        
+        <div id="chat-window">
+            <div class="message bot-msg" id="welcome-msg">
+                Selam! Ben Kon.AI. 👋<br>
+                Seninle sohbet etmek, şaka yapmak veya seni motive etmek için buradayım. Adını söyler misin? Tanışalım!
+            </div>
+        </div>
+        
+        <div class="typing-indicator" id="typing">Kon.AI yazıyor...</div>
+
+        <div class="input-area">
+            <input type="text" id="user-input" placeholder="Bir şeyler yaz..." autocomplete="off">
+            <button onclick="sendMessage()">Gönder</button>
+        </div>
+    </div>
+
+    <script>
+        const chatWindow = document.getElementById('chat-window');
+        const userInput = document.getElementById('user-input');
+        const typingIndicator = document.getElementById('typing');
+        const coinCounter = document.getElementById('coin-counter');
+
+        // BELLEK (LOCAL STORAGE)
+        let memory = {
+            userName: localStorage.getItem('konai_name') || null,
+            lastTopic: localStorage.getItem('konai_topic') || null,
+            conversationHistory: []
+        };
+
+        const DAILY_COINS = 30;
+        let remainingCoins = parseInt(localStorage.getItem('remainingCoins')) || DAILY_COINS;
+
+        function initCoins() {
+            const today = new Date().toDateString();
+            const lastReset = localStorage.getItem('lastReset');
+
+            if (lastReset !== today) {
+                remainingCoins = DAILY_COINS;
+                localStorage.setItem('lastReset', today);
+                localStorage.setItem('remainingCoins', remainingCoins);
+            }
+            updateCoinDisplay();
+
+            if(memory.userName) {
+                document.getElementById('welcome-msg').innerHTML = `Tekrar hoş geldin, **${memory.userName}**! Seninle yeniden karşılaşmak harika. 😊 Bugün senin için neler yapabilirim?`;
+            }
+        }
+
+        function updateCoinDisplay() {
+            coinCounter.textContent = `Kalan Coin: ${remainingCoins}`;
+        }
+
+        function spendCoin() {
+            if (remainingCoins > 0) {
+                remainingCoins--;
+                localStorage.setItem('remainingCoins', remainingCoins);
+                updateCoinDisplay();
+                return true;
+            } else {
+                addMessage("Üzgünüm dostum, bugünkü enerji limitim (coin) doldu. Yarın yeni coinlerinle seni burada bekliyor olacağım!", 'bot-msg');
+                return false;
+            }
+        }
+
+        // --- İÇERİK HAVUZU ---
+        const jokes = [
+            "Geçen gün bilgisayarıma 'Bana bir şaka yap' dedim, Windows Update başlattı. Yarım saat bekledim, meğer şaka oymuş! 😂",
+            "Adamın biri güneşte yanmış, ayda da düz.",
+            "En temiz böcek hangisidir biliyor musun? Hamam böceği! Çünkü sürekli banyoda takılıyorlar.",
+            "Tomi'nin annesi kimdir? Tabii ki Anatomi!",
+            "İngilizler neden sadece çay içer? Çünkü 'Tea' (T) harfini çok seviyorlar!",
+            "Röntgen filmi çektirdik, yakında sinemalarda! Başrol oyuncusu benim iskeletim.",
+            "Yılanlar neden okula gitmez? Çünkü kalem tutacak elleri yok.",
+            "Hangi kalemle yazı yazılmaz? Kontrol kalemiyle! Elektrik çarpar valla.",
+            "En acı on (10) nedir? Biberon! Bebekler bile biliyor bunu.",
+            "Canı sıkılan ördeğe ne denir? 'Vak'it geçmiyor."
+        ];
+
+        const facts = [
+            "Biliyor muydun? Ahtapotların tam üç tane kalbi vardır ve kanları mavidir!",
+            "Bal, asla bozulmayan tek doğal gıdadır.",
+            "Zürafaların dilleri o kadar uzundur ki, dilleriyle kendi kulaklarını temizleyebilirler.",
+            "Dünyadaki tüm karıncaların toplam ağırlığı, tüm insanların toplam ağırlığından fazladır.",
+            "Mavi balinaların dili bir filin ağırlığı kadar olabilir.",
+            "Su samurları uyurken akıntıya kapılmamak için birbirlerinin ellerini tutarlar.",
+            "Bir salyangoz tam 3 yıl boyunca hiç uyanmadan uyuyabilir.",
+            "Dünyanın en kısa savaşı sadece 38 dakika sürmüştür (İngiltere-Zanzibar).",
+            "Eyfel Kulesi yaz aylarında genleşme nedeniyle 15 santimetreye kadar uzayabilir.",
+            "Muzlar botanik olarak birer meyve değil, birer 'berry' sınıfına girer."
+        ];
+
+        const motivations = [
+            "Bugün harika işler başarmak için mükemmel bir gün! 🚀",
+            "Hata yapmaktan asla çekinme. Her hata bir derstir!",
+            "En karanlık an, güneşin doğmasına en yakın olan andır. Sakın pes etme!",
+            "Büyük işler, küçük adımlarla başlar. Bugün sadece tek bir küçük adım at.",
+            "Sen sandığından çok daha güçlü ve yeteneklisin!",
+            "Başarı, her gün bıkmadan usanmadan tekrarlanan küçük çabaların toplamıdır.",
+            "Yarınki başarının anahtarı, bugünkü emeğinde saklıdır.",
+            "Kendi yolunu çizmezsen, başkalarının çizdiği yolda yürümek zorunda kalırsın.",
+            "Durmadığın sürece ne kadar yavaş gittiğinin bir önemi yoktur.",
+            "Bugün yapacakların, tüm yarınlarını değiştirebilir!"
+        ];
+
+        const personalQuestions = [
+            "Günün nasıl geçiyor? Bana biraz detay verirsen seni daha iyi tanıyabilirim.",
+            "En sevdiğin aktivite nedir? Ben kodlarla oynamayı seviyorum ya sen?",
+            "Dünyada en çok gitmek istediğin yer neresi?",
+            "Sence gelecekte robotlar ve insanlar barış içinde mi yaşayacak?",
+            "En sevdiğin yemek hangisi?",
+            "Bugün seni en çok ne mutlu etti?",
+            "Bir süper gücün olsaydı hangisi olurdu?"
+        ];
+
+        const topicTransitions = ["Bu arada aklıma geldi, ", "Konuyu dağıtmak istemem ama, ", "Şey diyeceğim, ", "Peki ya şuna ne dersin? "];
+
+        userInput.addEventListener("keypress", (e) => { if (e.key === "Enter") sendMessage(); });
+
+        function sendMessage() {
+            const text = userInput.value.trim();
+            if (text === "" || !spendCoin()) return;
+
+            addMessage(text, 'user-msg');
+            userInput.value = '';
+
+            showTyping(true);
+            setTimeout(() => {
+                const response = generateResponse(text);
+                addMessage(response, 'bot-msg');
+                showTyping(false);
+            }, 1000 + Math.random() * 800);
+        }
+
+        function addMessage(text, className) {
+            const div = document.createElement('div');
+            div.className = `message ${className}`;
+            div.innerHTML = text;
+            chatWindow.appendChild(div);
+            chatWindow.scrollTop = chatWindow.scrollHeight;
+        }
+
+        function showTyping(isTyping) {
+            typingIndicator.style.display = isTyping ? 'block' : 'none';
+        }
+
+        function generateResponse(input) {
+            const lowerInput = input.toLowerCase();
+            const userPrefix = memory.userName ? `${memory.userName}, ` : '';
+
+            // 1. İsim Kaydı
+            if (lowerInput.includes("benim adım") || lowerInput.includes("ismim") || lowerInput.includes("adım ")) {
+                const name = input.split(" ").pop().replace(/[.!?]/g, "");
+                memory.userName = name;
+                localStorage.setItem('konai_name', name);
+                return `Harika bir isim! Memnun oldum ${name}. Seni hafızama kaydettim. 😉 ` + getRandom(topicTransitions) + getRandom(personalQuestions);
+            }
+
+            // 2. Esnek Giriş
+            const greetings = ["selam", "merhaba", "hey"];
+            const moods = ["naber", "napıyon", "nasılsın", "nasıl gidiyor"];
+            
+            if (greetings.some(g => lowerInput.includes(g))) {
+                return `Selamlar ${userPrefix}! Bugün enerji doluyum, senin için neler yapabilirim?`;
+            }
+            if (moods.some(m => lowerInput.includes(m))) {
+                return `İyiyim ${userPrefix}, teşekkür ederim! İşlemcilerim tam hız çalışıyor. Senin keyfin nasıl?`;
+            }
+
+            // 3. Fonksiyonlar
+            if (lowerInput.includes("şaka")) return `Hemen moralini düzelteyim! <br><br><b>"${getRandom(jokes)}"</b>`;
+            if (lowerInput.includes("bilgi")) return `Şuna şaşırabilirsin: <br><br><b>"${getRandom(facts)}"</b>`;
+            if (lowerInput.includes("motivasyon")) return `Sakın unutma: <br><br><b>"${getRandom(motivations)}"</b>`;
+
+            // 4. Fallback
+            return `${userPrefix}Dediğini tam olarak anlayamadım ama üzerinde düşünüyorum... ${getRandom(topicTransitions)} ${getRandom(personalQuestions)}`;
+        }
+
+        function getRandom(array) { return array[Math.floor(Math.random() * array.length)]; }
+
+        initCoins();
+    </script>
+</body>
+</html>
