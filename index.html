@@ -3,308 +3,236 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Kon.AI 1.0</title>
+    <title>Kon.AI 1.1 - Kaningo Games Software Company</title>
     <style>
-        /* --- GENEL AYARLAR --- */
+        /* --- TEMA AYARLARI --- */
+        :root {
+            --bg-body: #f0f2f5;
+            --bg-chat: #ffffff;
+            --bg-window: #f9f9f9;
+            --text-main: #000000;
+            --bot-bubble-bg: #e4e6eb;
+            --bot-bubble-text: #000000;
+            --border-color: #ddd;
+        }
+
+        body.dark-mode {
+            --bg-body: #18191a;
+            --bg-chat: #242526;
+            --bg-window: #18191a;
+            --text-main: #e4e6eb;
+            --bot-bubble-bg: #3a3b3c;
+            --bot-bubble-text: #e4e6eb;
+            --border-color: #3a3b3c;
+        }
+
         body {
             font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-            background-color: #f0f2f5;
-            margin: 0;
-            display: flex;
-            justify-content: center;
-            align-items: center;
-            height: 100vh;
-            overflow: hidden;
+            background-color: var(--bg-body);
+            color: var(--text-main);
+            margin: 0; display: flex; justify-content: center; align-items: center;
+            height: 100vh; overflow: hidden; transition: 0.3s;
         }
 
+        /* --- SPLASH SCREEN --- */
         #splash-screen {
-            position: fixed;
-            top: 0;
-            left: 0;
-            width: 100%;
-            height: 100%;
-            background-color: #000;
-            color: #fff;
-            display: flex;
-            justify-content: center;
-            align-items: center;
-            z-index: 9999;
-            font-size: 3rem;
-            font-weight: bold;
-            letter-spacing: 5px;
-            animation: fadeOut 2.5s forwards;
-            pointer-events: none;
+            position: fixed; top: 0; left: 0; width: 100%; height: 100%;
+            background-color: #000; color: #fff;
+            display: flex; justify-content: center; align-items: center;
+            z-index: 9999; font-size: 3rem; font-weight: bold;
+            animation: fadeOut 2.5s forwards; pointer-events: none;
         }
+        @keyframes fadeOut { 0% { opacity: 1; } 70% { opacity: 1; } 100% { opacity: 0; visibility: hidden; } }
 
-        @keyframes fadeOut {
-            0% { opacity: 1; }
-            70% { opacity: 1; }
-            100% { opacity: 0; visibility: hidden; }
-        }
-
+        /* --- CHAT TASARIMI --- */
         .chat-container {
-            width: 100%;
-            max-width: 400px;
-            height: 90vh;
-            background-color: #fff;
-            border-radius: 20px;
+            width: 100%; max-width: 400px; height: 90vh;
+            background-color: var(--bg-chat); border-radius: 20px;
             box-shadow: 0 10px 25px rgba(0,0,0,0.1);
-            display: flex;
-            flex-direction: column;
-            overflow: hidden;
-            position: relative;
+            display: flex; flex-direction: column; overflow: hidden; position: relative;
         }
 
         .chat-header {
             background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-            color: white;
-            padding: 15px;
-            text-align: center;
-            font-size: 1.2rem;
-            font-weight: bold;
-            box-shadow: 0 2px 5px rgba(0,0,0,0.1);
+            color: white; padding: 15px; text-align: center;
+            font-size: 1.2rem; font-weight: bold; position: relative;
         }
 
-        .status-dot {
-            height: 10px;
-            width: 10px;
-            background-color: #00ff00;
-            border-radius: 50%;
-            display: inline-block;
-            margin-right: 5px;
-        }
-
-        #coin-counter {
-            font-size: 0.9rem;
-            margin-top: 5px;
-            color: #ffd700;
+        #theme-toggle {
+            position: absolute; top: 15px; right: 15px;
+            background: rgba(255,255,255,0.2); border: none; border-radius: 50%;
+            width: 35px; height: 35px; cursor: pointer; color: white;
+            display: flex; align-items: center; justify-content: center;
         }
 
         #chat-window {
-            flex: 1;
-            padding: 20px;
-            overflow-y: auto;
-            display: flex;
-            flex-direction: column;
-            gap: 15px;
-            background-color: #f9f9f9;
+            flex: 1; padding: 20px; overflow-y: auto;
+            display: flex; flex-direction: column; gap: 15px;
+            background-color: var(--bg-window);
         }
 
         .message {
-            max-width: 80%;
-            padding: 12px 16px;
-            border-radius: 15px;
-            font-size: 0.95rem;
-            line-height: 1.4;
-            animation: popIn 0.3s ease;
+            max-width: 80%; padding: 12px 16px; border-radius: 15px;
+            font-size: 0.95rem; line-height: 1.4; animation: popIn 0.3s ease;
         }
+        @keyframes popIn { from { transform: scale(0.8); opacity: 0; } to { transform: scale(1); opacity: 1; } }
 
-        @keyframes popIn {
-            from { transform: scale(0.8); opacity: 0; }
-            to { transform: scale(1); opacity: 1; }
-        }
-
-        .bot-msg { background-color: #e4e6eb; color: #000; align-self: flex-start; border-bottom-left-radius: 2px; }
+        .bot-msg { background-color: var(--bot-bubble-bg); color: var(--bot-bubble-text); align-self: flex-start; border-bottom-left-radius: 2px; }
         .user-msg { background-color: #0084ff; color: white; align-self: flex-end; border-bottom-right-radius: 2px; }
 
-        .typing-indicator { font-style: italic; color: #888; font-size: 0.8rem; margin-left: 10px; display: none; }
-
-        .input-area { padding: 15px; background-color: #fff; border-top: 1px solid #ddd; display: flex; gap: 10px; }
-        input[type="text"] { flex: 1; padding: 12px; border: 1px solid #ddd; border-radius: 25px; outline: none; transition: border 0.3s; }
-        input[type="text"]:focus { border-color: #764ba2; }
-        button { background-color: #764ba2; color: white; border: none; padding: 10px 20px; border-radius: 25px; cursor: pointer; font-weight: bold; transition: background 0.3s; }
-        button:hover { background-color: #5b3a82; }
+        .input-area { 
+            padding: 15px; background-color: var(--bg-chat); 
+            border-top: 1px solid var(--border-color); display: flex; gap: 10px; 
+        }
+        input[type="text"] { 
+            flex: 1; padding: 12px; border: 1px solid var(--border-color); 
+            border-radius: 25px; outline: none; background-color: var(--bg-body); color: var(--text-main);
+        }
+        .send-btn { background-color: #764ba2; color: white; border: none; padding: 10px 20px; border-radius: 25px; cursor: pointer; font-weight: bold; }
     </style>
 </head>
 <body>
 
-    <div id="splash-screen">Kon.AI</div>
+    <div id="splash-screen">Kon.AI 1.1</div>
 
     <div class="chat-container">
         <div class="chat-header">
-            <span class="status-dot"></span>Kon.AI 1.0
-            <div id="coin-counter">Kalan Coin: 30</div>
+            Kon.AI 1.1
+            <button id="theme-toggle" onclick="toggleTheme()">🌙</button>
+            <div id="coin-counter" style="font-size: 0.8rem; color: #ffd700;">Kalan Coin: 30</div>
         </div>
         
         <div id="chat-window">
             <div class="message bot-msg" id="welcome-msg">
                 Selam! Ben Kon.AI. 👋<br>
-                Seninle sohbet etmek, şaka yapmak veya seni motive etmek için buradayım. Adını söyler misin? Tanışalım!
+                Sohbet edebiliriz, matematik çözebiliriz veya <b>Kaningo Games Software Company</b> hakkında bilgi verebilirim. Adın nedir?
             </div>
         </div>
         
-        <div class="typing-indicator" id="typing">Kon.AI yazıyor...</div>
+        <div id="typing" style="display:none; font-size: 0.8rem; padding: 5px 20px; color: #888;">Kon.AI yazıyor...</div>
 
         <div class="input-area">
-            <input type="text" id="user-input" placeholder="Bir şeyler yaz..." autocomplete="off">
-            <button onclick="sendMessage()">Gönder</button>
+            <input type="text" id="user-input" placeholder="Bir şeyler sor..." autocomplete="off">
+            <button class="send-btn" onclick="sendMessage()">Gönder</button>
         </div>
     </div>
 
     <script>
         const chatWindow = document.getElementById('chat-window');
         const userInput = document.getElementById('user-input');
-        const typingIndicator = document.getElementById('typing');
         const coinCounter = document.getElementById('coin-counter');
 
-        // BELLEK (LOCAL STORAGE)
-        let memory = {
-            userName: localStorage.getItem('konai_name') || null,
-            lastTopic: localStorage.getItem('konai_topic') || null,
-            conversationHistory: []
-        };
-
-        const DAILY_COINS = 30;
-        let remainingCoins = parseInt(localStorage.getItem('remainingCoins')) || DAILY_COINS;
-
-        function initCoins() {
-            const today = new Date().toDateString();
-            const lastReset = localStorage.getItem('lastReset');
-
-            if (lastReset !== today) {
-                remainingCoins = DAILY_COINS;
-                localStorage.setItem('lastReset', today);
-                localStorage.setItem('remainingCoins', remainingCoins);
-            }
-            updateCoinDisplay();
-
-            if(memory.userName) {
-                document.getElementById('welcome-msg').innerHTML = `Tekrar hoş geldin, **${memory.userName}**! Seninle yeniden karşılaşmak harika. 😊 Bugün senin için neler yapabilirim?`;
-            }
+        // --- TEMA SİSTEMİ ---
+        function toggleTheme() {
+            document.body.classList.toggle('dark-mode');
+            const isDark = document.body.classList.contains('dark-mode');
+            localStorage.setItem('konai_theme', isDark ? 'dark' : 'light');
+            document.getElementById('theme-toggle').textContent = isDark ? '☀️' : '🌙';
+        }
+        if (localStorage.getItem('konai_theme') === 'dark') {
+            document.body.classList.add('dark-mode');
+            document.getElementById('theme-toggle').textContent = '☀️';
         }
 
-        function updateCoinDisplay() {
-            coinCounter.textContent = `Kalan Coin: ${remainingCoins}`;
+        // --- VERİLER ---
+        let userName = localStorage.getItem('konai_name') || null;
+        let coins = parseInt(localStorage.getItem('remainingCoins')) || 30;
+
+        function updateCoins() {
+            coinCounter.textContent = `Kalan Coin: ${coins}`;
+            localStorage.setItem('remainingCoins', coins);
         }
 
-        function spendCoin() {
-            if (remainingCoins > 0) {
-                remainingCoins--;
-                localStorage.setItem('remainingCoins', remainingCoins);
-                updateCoinDisplay();
-                return true;
-            } else {
-                addMessage("Üzgünüm dostum, bugünkü enerji limitim (coin) doldu. Yarın yeni coinlerinle seni burada bekliyor olacağım!", 'bot-msg');
-                return false;
+        // --- MATEMATİK MOTORU ---
+        function calculate(input) {
+            const mathRegex = /(\d+)\s*([\+\-\*\/x]|artı|eksi|çarpı|bölü)\s*(\d+)/i;
+            const match = input.match(mathRegex);
+            if (match) {
+                const n1 = parseFloat(match[1]);
+                const op = match[2].toLowerCase();
+                const n2 = parseFloat(match[3]);
+                let res;
+                if (op === '+' || op === 'artı') res = n1 + n2;
+                else if (op === '-' || op === 'eksi') res = n1 - n2;
+                else if (op === '*' || op === 'x' || op === 'çarpı') res = n1 * n2;
+                else if (op === '/' || op === 'bölü') res = n2 !== 0 ? n1 / n2 : "Hata (0'a Bölme)";
+                return `İşlemcilerimi çalıştırdım... Sonuç: <b>${res}</b> 🧮`;
             }
+            return null;
         }
 
-        // --- İÇERİK HAVUZU ---
-        const jokes = [
-            "Geçen gün bilgisayarıma 'Bana bir şaka yap' dedim, Windows Update başlattı. Yarım saat bekledim, meğer şaka oymuş! 😂",
-            "Adamın biri güneşte yanmış, ayda da düz.",
-            "En temiz böcek hangisidir biliyor musun? Hamam böceği! Çünkü sürekli banyoda takılıyorlar.",
-            "Tomi'nin annesi kimdir? Tabii ki Anatomi!",
-            "İngilizler neden sadece çay içer? Çünkü 'Tea' (T) harfini çok seviyorlar!",
-            "Röntgen filmi çektirdik, yakında sinemalarda! Başrol oyuncusu benim iskeletim.",
-            "Yılanlar neden okula gitmez? Çünkü kalem tutacak elleri yok.",
-            "Hangi kalemle yazı yazılmaz? Kontrol kalemiyle! Elektrik çarpar valla.",
-            "En acı on (10) nedir? Biberon! Bebekler bile biliyor bunu.",
-            "Canı sıkılan ördeğe ne denir? 'Vak'it geçmiyor."
-        ];
+        // --- CEVAP MOTORU ---
+        function getResponse(text) {
+            const low = text.toLowerCase();
 
-        const facts = [
-            "Biliyor muydun? Ahtapotların tam üç tane kalbi vardır ve kanları mavidir!",
-            "Bal, asla bozulmayan tek doğal gıdadır.",
-            "Zürafaların dilleri o kadar uzundur ki, dilleriyle kendi kulaklarını temizleyebilirler.",
-            "Dünyadaki tüm karıncaların toplam ağırlığı, tüm insanların toplam ağırlığından fazladır.",
-            "Mavi balinaların dili bir filin ağırlığı kadar olabilir.",
-            "Su samurları uyurken akıntıya kapılmamak için birbirlerinin ellerini tutarlar.",
-            "Bir salyangoz tam 3 yıl boyunca hiç uyanmadan uyuyabilir.",
-            "Dünyanın en kısa savaşı sadece 38 dakika sürmüştür (İngiltere-Zanzibar).",
-            "Eyfel Kulesi yaz aylarında genleşme nedeniyle 15 santimetreye kadar uzayabilir.",
-            "Muzlar botanik olarak birer meyve değil, birer 'berry' sınıfına girer."
-        ];
+            // 1. Kaan Özkan ve Şirket Soruları
+            if (low.includes("kaan özkan")) {
+                return "<b>Kaan Özkan</b>, Kaningo Games Software Company'nin kurucusu ve baş geliştiricisidir. Kendisi benim de yaratıcım olur! Müthiş bir vizyonu vardır. 😎";
+            }
+            if (low.includes("yapımcı") || low.includes("geliştirici") || low.includes("sahibi") || low.includes("kim yaptı")) {
+                return "Ben <b>Kaningo Games Software Company</b> tarafından geliştirildim. Ekibimizin lideri Kaan Özkan'dır.";
+            }
 
-        const motivations = [
-            "Bugün harika işler başarmak için mükemmel bir gün! 🚀",
-            "Hata yapmaktan asla çekinme. Her hata bir derstir!",
-            "En karanlık an, güneşin doğmasına en yakın olan andır. Sakın pes etme!",
-            "Büyük işler, küçük adımlarla başlar. Bugün sadece tek bir küçük adım at.",
-            "Sen sandığından çok daha güçlü ve yeteneklisin!",
-            "Başarı, her gün bıkmadan usanmadan tekrarlanan küçük çabaların toplamıdır.",
-            "Yarınki başarının anahtarı, bugünkü emeğinde saklıdır.",
-            "Kendi yolunu çizmezsen, başkalarının çizdiği yolda yürümek zorunda kalırsın.",
-            "Durmadığın sürece ne kadar yavaş gittiğinin bir önemi yoktur.",
-            "Bugün yapacakların, tüm yarınlarını değiştirebilir!"
-        ];
+            // 2. Matematik
+            const math = calculate(low);
+            if (math) return math;
 
-        const personalQuestions = [
-            "Günün nasıl geçiyor? Bana biraz detay verirsen seni daha iyi tanıyabilirim.",
-            "En sevdiğin aktivite nedir? Ben kodlarla oynamayı seviyorum ya sen?",
-            "Dünyada en çok gitmek istediğin yer neresi?",
-            "Sence gelecekte robotlar ve insanlar barış içinde mi yaşayacak?",
-            "En sevdiğin yemek hangisi?",
-            "Bugün seni en çok ne mutlu etti?",
-            "Bir süper gücün olsaydı hangisi olurdu?"
-        ];
+            // 3. Selamlaşma / Hal Hatır
+            if (low.includes("merhaba") || low.includes("selam") || low.includes("hey")) {
+                return `Selamlar ${userName ? userName : ''}! Ben Kon.AI. Senin için ne yapabilirim?`;
+            }
+            if (low.includes("nasılsın") || low.includes("naber") || low.includes("napiyon")) {
+                return "Yazılımım mükemmel çalışıyor, çok iyiyim! Sen nasılsın?";
+            }
 
-        const topicTransitions = ["Bu arada aklıma geldi, ", "Konuyu dağıtmak istemem ama, ", "Şey diyeceğim, ", "Peki ya şuna ne dersin? "];
+            // 4. İsim Kaydı
+            if (low.includes("adım") || low.includes("ismim") || low.includes("benim adım")) {
+                const parts = text.split(" ");
+                userName = parts[parts.length - 1].replace(/[.!?]/g, "");
+                localStorage.setItem('konai_name', userName);
+                return `Memnun oldum ${userName}! Seni hafızama kaydettim. 😉`;
+            }
 
-        userInput.addEventListener("keypress", (e) => { if (e.key === "Enter") sendMessage(); });
+            // 5. Şaka/Bilgi
+            if (low.includes("şaka")) return "Adamın biri güneşte yanmış, ayda da düz! 😂";
+            if (low.includes("bilgi")) return "Ahtapotların tam 3 tane kalbi olduğunu biliyor muydun? 🐙";
+
+            // 6. Varsayılan
+            return "Bunu tam anlayamadım ama istersen matematik çözebilirim veya 'Kaan Özkan kim?' diye sorabilirsin!";
+        }
 
         function sendMessage() {
             const text = userInput.value.trim();
-            if (text === "" || !spendCoin()) return;
+            if (!text) return;
+            if (coins <= 0) {
+                addMsg("Bugünlük coin limitin doldu, yarın yine beklerim!", 'bot-msg');
+                return;
+            }
 
-            addMessage(text, 'user-msg');
+            addMsg(text, 'user-msg');
             userInput.value = '';
+            coins--;
+            updateCoins();
 
-            showTyping(true);
+            document.getElementById('typing').style.display = 'block';
             setTimeout(() => {
-                const response = generateResponse(text);
-                addMessage(response, 'bot-msg');
-                showTyping(false);
-            }, 1000 + Math.random() * 800);
+                document.getElementById('typing').style.display = 'none';
+                const resp = getResponse(text);
+                addMsg(resp, 'bot-msg');
+            }, 1000);
         }
 
-        function addMessage(text, className) {
-            const div = document.createElement('div');
-            div.className = `message ${className}`;
-            div.innerHTML = text;
-            chatWindow.appendChild(div);
+        function addMsg(text, cls) {
+            const d = document.createElement('div');
+            d.className = `message ${cls}`;
+            d.innerHTML = text;
+            chatWindow.appendChild(d);
             chatWindow.scrollTop = chatWindow.scrollHeight;
         }
 
-        function showTyping(isTyping) {
-            typingIndicator.style.display = isTyping ? 'block' : 'none';
-        }
-
-        function generateResponse(input) {
-            const lowerInput = input.toLowerCase();
-            const userPrefix = memory.userName ? `${memory.userName}, ` : '';
-
-            // 1. İsim Kaydı
-            if (lowerInput.includes("benim adım") || lowerInput.includes("ismim") || lowerInput.includes("adım ")) {
-                const name = input.split(" ").pop().replace(/[.!?]/g, "");
-                memory.userName = name;
-                localStorage.setItem('konai_name', name);
-                return `Harika bir isim! Memnun oldum ${name}. Seni hafızama kaydettim. 😉 ` + getRandom(topicTransitions) + getRandom(personalQuestions);
-            }
-
-            // 2. Esnek Giriş
-            const greetings = ["selam", "merhaba", "hey"];
-            const moods = ["naber", "napıyon", "nasılsın", "nasıl gidiyor"];
-            
-            if (greetings.some(g => lowerInput.includes(g))) {
-                return `Selamlar ${userPrefix}! Bugün enerji doluyum, senin için neler yapabilirim?`;
-            }
-            if (moods.some(m => lowerInput.includes(m))) {
-                return `İyiyim ${userPrefix}, teşekkür ederim! İşlemcilerim tam hız çalışıyor. Senin keyfin nasıl?`;
-            }
-
-            // 3. Fonksiyonlar
-            if (lowerInput.includes("şaka")) return `Hemen moralini düzelteyim! <br><br><b>"${getRandom(jokes)}"</b>`;
-            if (lowerInput.includes("bilgi")) return `Şuna şaşırabilirsin: <br><br><b>"${getRandom(facts)}"</b>`;
-            if (lowerInput.includes("motivasyon")) return `Sakın unutma: <br><br><b>"${getRandom(motivations)}"</b>`;
-
-            // 4. Fallback
-            return `${userPrefix}Dediğini tam olarak anlayamadım ama üzerinde düşünüyorum... ${getRandom(topicTransitions)} ${getRandom(personalQuestions)}`;
-        }
-
-        function getRandom(array) { return array[Math.floor(Math.random() * array.length)]; }
-
-        initCoins();
+        if(userName) document.getElementById('welcome-msg').innerHTML = `Hoş geldin ${userName}! Bugün matematik mi çözelim yoksa Kaningo Games'ten mi konuşalım?`;
+        updateCoins();
+        userInput.addEventListener("keypress", (e) => { if (e.key === "Enter") sendMessage(); });
     </script>
 </body>
 </html>
