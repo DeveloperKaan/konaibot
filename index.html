@@ -3,116 +3,74 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Kon.AI 1.1 - Kaningo Games Software Company</title>
+    <title>Kon.AI 1.2 - Kaningo Games Software Company</title>
     <style>
-        /* --- TEMA AYARLARI --- */
+        /* Önceki v1.1 Tasarımı Korundu */
         :root {
-            --bg-body: #f0f2f5;
-            --bg-chat: #ffffff;
-            --bg-window: #f9f9f9;
-            --text-main: #000000;
-            --bot-bubble-bg: #e4e6eb;
-            --bot-bubble-text: #000000;
+            --bg-body: #f0f2f5; --bg-chat: #ffffff; --bg-window: #f9f9f9;
+            --text-main: #000000; --bot-bubble-bg: #e4e6eb; --bot-bubble-text: #000000;
             --border-color: #ddd;
         }
-
         body.dark-mode {
-            --bg-body: #18191a;
-            --bg-chat: #242526;
-            --bg-window: #18191a;
-            --text-main: #e4e6eb;
-            --bot-bubble-bg: #3a3b3c;
-            --bot-bubble-text: #e4e6eb;
+            --bg-body: #18191a; --bg-chat: #242526; --bg-window: #18191a;
+            --text-main: #e4e6eb; --bot-bubble-bg: #3a3b3c; --bot-bubble-text: #e4e6eb;
             --border-color: #3a3b3c;
         }
-
         body {
-            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-            background-color: var(--bg-body);
-            color: var(--text-main);
-            margin: 0; display: flex; justify-content: center; align-items: center;
-            height: 100vh; overflow: hidden; transition: 0.3s;
+            font-family: 'Segoe UI', Tahoma, sans-serif; background-color: var(--bg-body);
+            color: var(--text-main); margin: 0; display: flex; justify-content: center;
+            align-items: center; height: 100vh; overflow: hidden; transition: 0.3s;
         }
-
-        /* --- SPLASH SCREEN --- */
         #splash-screen {
             position: fixed; top: 0; left: 0; width: 100%; height: 100%;
-            background-color: #000; color: #fff;
-            display: flex; justify-content: center; align-items: center;
-            z-index: 9999; font-size: 3rem; font-weight: bold;
+            background-color: #000; color: #fff; display: flex; justify-content: center;
+            align-items: center; z-index: 9999; font-size: 3rem; font-weight: bold;
             animation: fadeOut 2.5s forwards; pointer-events: none;
         }
         @keyframes fadeOut { 0% { opacity: 1; } 70% { opacity: 1; } 100% { opacity: 0; visibility: hidden; } }
 
-        /* --- CHAT TASARIMI --- */
         .chat-container {
             width: 100%; max-width: 400px; height: 90vh;
             background-color: var(--bg-chat); border-radius: 20px;
-            box-shadow: 0 10px 25px rgba(0,0,0,0.1);
-            display: flex; flex-direction: column; overflow: hidden; position: relative;
+            box-shadow: 0 10px 25px rgba(0,0,0,0.1); display: flex; flex-direction: column; overflow: hidden;
         }
-
         .chat-header {
             background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-            color: white; padding: 15px; text-align: center;
-            font-size: 1.2rem; font-weight: bold; position: relative;
+            color: white; padding: 15px; text-align: center; font-size: 1.2rem; font-weight: bold; position: relative;
         }
-
         #theme-toggle {
-            position: absolute; top: 15px; right: 15px;
-            background: rgba(255,255,255,0.2); border: none; border-radius: 50%;
-            width: 35px; height: 35px; cursor: pointer; color: white;
-            display: flex; align-items: center; justify-content: center;
+            position: absolute; top: 15px; right: 15px; background: rgba(255,255,255,0.2);
+            border: none; border-radius: 50%; width: 35px; height: 35px; cursor: pointer; color: white;
         }
-
-        #chat-window {
-            flex: 1; padding: 20px; overflow-y: auto;
-            display: flex; flex-direction: column; gap: 15px;
-            background-color: var(--bg-window);
-        }
-
-        .message {
-            max-width: 80%; padding: 12px 16px; border-radius: 15px;
-            font-size: 0.95rem; line-height: 1.4; animation: popIn 0.3s ease;
-        }
+        #chat-window { flex: 1; padding: 20px; overflow-y: auto; display: flex; flex-direction: column; gap: 15px; background-color: var(--bg-window); }
+        .message { max-width: 80%; padding: 12px 16px; border-radius: 15px; font-size: 0.95rem; line-height: 1.4; animation: popIn 0.3s ease; }
         @keyframes popIn { from { transform: scale(0.8); opacity: 0; } to { transform: scale(1); opacity: 1; } }
-
         .bot-msg { background-color: var(--bot-bubble-bg); color: var(--bot-bubble-text); align-self: flex-start; border-bottom-left-radius: 2px; }
         .user-msg { background-color: #0084ff; color: white; align-self: flex-end; border-bottom-right-radius: 2px; }
-
-        .input-area { 
-            padding: 15px; background-color: var(--bg-chat); 
-            border-top: 1px solid var(--border-color); display: flex; gap: 10px; 
-        }
-        input[type="text"] { 
-            flex: 1; padding: 12px; border: 1px solid var(--border-color); 
-            border-radius: 25px; outline: none; background-color: var(--bg-body); color: var(--text-main);
-        }
+        .input-area { padding: 15px; background-color: var(--bg-chat); border-top: 1px solid var(--border-color); display: flex; gap: 10px; }
+        input[type="text"] { flex: 1; padding: 12px; border: 1px solid var(--border-color); border-radius: 25px; outline: none; background-color: var(--bg-body); color: var(--text-main); }
         .send-btn { background-color: #764ba2; color: white; border: none; padding: 10px 20px; border-radius: 25px; cursor: pointer; font-weight: bold; }
     </style>
 </head>
 <body>
 
-    <div id="splash-screen">Kon.AI 1.1</div>
+    <div id="splash-screen">Kon.AI 1.2</div>
 
     <div class="chat-container">
         <div class="chat-header">
-            Kon.AI 1.1
+            Kon.AI 1.2
             <button id="theme-toggle" onclick="toggleTheme()">🌙</button>
             <div id="coin-counter" style="font-size: 0.8rem; color: #ffd700;">Kalan Coin: 30</div>
         </div>
-        
         <div id="chat-window">
             <div class="message bot-msg" id="welcome-msg">
                 Selam! Ben Kon.AI. 👋<br>
-                Sohbet edebiliriz, matematik çözebiliriz veya <b>Kaningo Games Software Company</b> hakkında bilgi verebilirim. Adın nedir?
+                Sohbet edebiliriz,matematik soruları çözebilirim veya <b>"Hava durumu İstanbul Beşiktaş"</b> gibi sorular sorabilirsin! Adın nedir?
             </div>
         </div>
-        
-        <div id="typing" style="display:none; font-size: 0.8rem; padding: 5px 20px; color: #888;">Kon.AI yazıyor...</div>
-
+        <div id="typing" style="display:none; font-size: 0.8rem; padding: 5px 20px; color: #888;">Kon.AI verileri buluyor...</div>
         <div class="input-area">
-            <input type="text" id="user-input" placeholder="Bir şeyler sor..." autocomplete="off">
+            <input type="text" id="user-input" placeholder="İl, ilçe veya matematik sorusu..." autocomplete="off">
             <button class="send-btn" onclick="sendMessage()">Gönder</button>
         </div>
     </div>
@@ -122,7 +80,7 @@
         const userInput = document.getElementById('user-input');
         const coinCounter = document.getElementById('coin-counter');
 
-        // --- TEMA SİSTEMİ ---
+        // --- TEMA VE COIN AYARLARI ---
         function toggleTheme() {
             document.body.classList.toggle('dark-mode');
             const isDark = document.body.classList.contains('dark-mode');
@@ -134,7 +92,6 @@
             document.getElementById('theme-toggle').textContent = '☀️';
         }
 
-        // --- VERİLER ---
         let userName = localStorage.getItem('konai_name') || null;
         let coins = parseInt(localStorage.getItem('remainingCoins')) || 30;
 
@@ -156,56 +113,93 @@
                 else if (op === '-' || op === 'eksi') res = n1 - n2;
                 else if (op === '*' || op === 'x' || op === 'çarpı') res = n1 * n2;
                 else if (op === '/' || op === 'bölü') res = n2 !== 0 ? n1 / n2 : "Hata (0'a Bölme)";
-                return `İşlemcilerimi çalıştırdım... Sonuç: <b>${res}</b> 🧮`;
+                return `Düşündüm ve... Sonuç: <b>${res}</b> 🧮`;
             }
             return null;
         }
 
-        // --- CEVAP MOTORU ---
-        function getResponse(text) {
+        // --- YENİ: HAVA DURUMU API MOTORU ---
+        async function fetchWeather(locationQuery) {
+            try {
+                // 1. Geocoding API: İl/İlçe isminden koordinat bulma
+                const geoUrl = `https://geocoding-api.open-meteo.com/v1/search?name=${encodeURIComponent(locationQuery)}&count=1&language=tr&format=json`;
+                const geoRes = await fetch(geoUrl);
+                const geoData = await geoRes.json();
+
+                if (!geoData.results || geoData.results.length === 0) {
+                    return "Üzgünüm, bu bölgeyi haritada bulamadım. 📍";
+                }
+
+                const { latitude, longitude, name, admin1 } = geoData.results[0];
+
+                // 2. Weather API: Koordinatlarla hava durumunu çekme
+                const weatherUrl = `https://api.open-meteo.com/v1/forecast?latitude=${latitude}&longitude=${longitude}&current_weather=true`;
+                const weatherRes = await fetch(weatherUrl);
+                const weatherData = await weatherRes.json();
+
+                const temp = weatherData.current_weather.temperature;
+                const code = weatherData.current_weather.weathercode;
+
+                // Basit hava durumu kodu yorumlama
+                let status = "Açık";
+                if (code > 0 && code < 4) status = "Parçalı Bulutlu";
+                if (code >= 45 && code <= 48) status = "Sisli";
+                if (code >= 51 && code <= 67) status = "Yağmurlu";
+                if (code >= 71 && code <= 77) status = "Karlı";
+                if (code >= 80) status = "Sağanak Yağışlı";
+
+                return `<b>${name} (${admin1})</b> için anlık hava durumu:<br>🌡️ Sıcaklık: <b>${temp}°C</b><br>☁️ Durum: <b>${status}</b>`;
+            } catch (error) {
+                return "Hava durumu servisine şu an bağlanamıyorum. 📡";
+            }
+        }
+
+        // --- GELİŞTİRİLMİŞ CEVAP MOTORU ---
+        async function getResponse(text) {
             const low = text.toLowerCase();
 
-            // 1. Kaan Özkan ve Şirket Soruları
-            if (low.includes("kaan özkan")) {
-                return "<b>Kaan Özkan</b>, Kaningo Games Software Company'nin kurucusu ve baş geliştiricisidir. Kendisi benim de yaratıcım olur! Müthiş bir vizyonu vardır. 😎";
-            }
-            if (low.includes("yapımcı") || low.includes("geliştirici") || low.includes("sahibi") || low.includes("kim yaptı")) {
-                return "Ben <b>Kaningo Games Software Company</b> tarafından geliştirildim. Ekibimizin lideri Kaan Özkan'dır.";
+            // 1. Hava Durumu Kontrolü (Hava kelimesi geçiyorsa)
+            if (low.includes("hava") || low.includes("durumu")) {
+                const query = text.replace(/hava|durumu|nedir|kaç/gi, "").trim();
+                if (query.length > 2) {
+                    return await fetchWeather(query);
+                } else {
+                    return "Hangi il veya ilçenin hava durumunu öğrenmek istersin? (Örn: Hava İstanbul)";
+                }
             }
 
-            // 2. Matematik
+            // 2. Kaan Özkan ve Şirket
+            if (low.includes("kaan özkan kim")) {
+                return "<b>KAAN ÖZKAN</b> Kaningo Games Software Company'nin kurucusu ve baş geliştiricisidir. Kendisi benim de yaratıcım ve geliştiricim olur! Müthiş bir vizyonu vardır. 😎";
+            }
+            if (low.includes("yapımcı") || low.includes("geliştirici")) {
+                return "Ben <b>Kaningo Games Software Company tarafından geliştirildim. Ekibimizin Lideri Kaan Özkan'dır CEO'su Anıl Demirel'dir.";
+            }
+
+            // 3. Matematik
             const math = calculate(low);
             if (math) return math;
 
-            // 3. Selamlaşma / Hal Hatır
-            if (low.includes("merhaba") || low.includes("selam") || low.includes("hey")) {
-                return `Selamlar ${userName ? userName : ''}! Ben Kon.AI. Senin için ne yapabilirim?`;
+            // 4. Selamlaşma / İsim
+            if (low.includes("merhaba") || low.includes("selam")) {
+                return `Selamlar ${userName || ''}! Ben Kon.AI. Sana nasıl yardımcı olabilirim?`;
             }
-            if (low.includes("nasılsın") || low.includes("naber") || low.includes("napiyon")) {
-                return "Yazılımım mükemmel çalışıyor, çok iyiyim! Sen nasılsın?";
-            }
-
-            // 4. İsim Kaydı
-            if (low.includes("adım") || low.includes("ismim") || low.includes("benim adım")) {
+            if (low.includes("adım") || low.includes("ismim")) {
                 const parts = text.split(" ");
                 userName = parts[parts.length - 1].replace(/[.!?]/g, "");
                 localStorage.setItem('konai_name', userName);
-                return `Memnun oldum ${userName}! Seni hafızama kaydettim. 😉`;
+                return `Memnun oldum ${userName}! Hafızama kaydettim. 😉`;
             }
 
-            // 5. Şaka/Bilgi
-            if (low.includes("şaka")) return "Adamın biri güneşte yanmış, ayda da düz! 😂";
-            if (low.includes("bilgi")) return "Ahtapotların tam 3 tane kalbi olduğunu biliyor muydun? 🐙";
-
-            // 6. Varsayılan
-            return "Bunu tam anlayamadım ama istersen matematik çözebilirim veya 'Kaan Özkan kim?' diye sorabilirsin!";
+            return "Bunu tam anlayamadım ama istersen matematik çözebilirim veya hava durumunu sorabilirsin!";
         }
 
-        function sendMessage() {
+        // --- MESAJ GÖNDERME (ASENKRON) ---
+        async function sendMessage() {
             const text = userInput.value.trim();
             if (!text) return;
             if (coins <= 0) {
-                addMsg("Bugünlük coin limitin doldu, yarın yine beklerim!", 'bot-msg');
+                addMsg("Bugünlük coin limitin doldu!", 'bot-msg');
                 return;
             }
 
@@ -215,11 +209,14 @@
             updateCoins();
 
             document.getElementById('typing').style.display = 'block';
+            
+            // Cevabı asenkron olarak bekle
+            const resp = await getResponse(text);
+            
             setTimeout(() => {
                 document.getElementById('typing').style.display = 'none';
-                const resp = getResponse(text);
                 addMsg(resp, 'bot-msg');
-            }, 1000);
+            }, 600);
         }
 
         function addMsg(text, cls) {
@@ -230,9 +227,10 @@
             chatWindow.scrollTop = chatWindow.scrollHeight;
         }
 
-        if(userName) document.getElementById('welcome-msg').innerHTML = `Hoş geldin ${userName}! Bugün matematik mi çözelim yoksa Kaningo Games'ten mi konuşalım?`;
+        if(userName) document.getElementById('welcome-msg').innerHTML = `Hoş geldin ${userName}! Bugün hava durumunu mu merak ediyorsun?`;
         updateCoins();
         userInput.addEventListener("keypress", (e) => { if (e.key === "Enter") sendMessage(); });
     </script>
 </body>
 </html>
+
