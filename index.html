@@ -3,9 +3,8 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Kon.AI 1.2 - Kaningo Games Software Company</title>
+    <title>Kon.AI 1.2.1 - Kaningo Games</title>
     <style>
-        /* Önceki v1.1 Tasarımı Korundu */
         :root {
             --bg-body: #f0f2f5; --bg-chat: #ffffff; --bg-window: #f9f9f9;
             --text-main: #000000; --bot-bubble-bg: #e4e6eb; --bot-bubble-text: #000000;
@@ -65,12 +64,12 @@
         <div id="chat-window">
             <div class="message bot-msg" id="welcome-msg">
                 Selam! Ben Kon.AI. 👋<br>
-                Sohbet edebiliriz,matematik soruları çözebilirim veya <b>"Hava durumu İstanbul Beşiktaş"</b> gibi sorular sorabilirsin! Adın nedir?
+                Sohbet edebiliriz, matematik çözebilirim veya <b>"YouTube'da kedi videoları"</b> gibi aramalar yapabilirim! Adın nedir?
             </div>
         </div>
         <div id="typing" style="display:none; font-size: 0.8rem; padding: 5px 20px; color: #888;">Kon.AI verileri buluyor...</div>
         <div class="input-area">
-            <input type="text" id="user-input" placeholder="İl, ilçe veya matematik sorusu..." autocomplete="off">
+            <input type="text" id="user-input" placeholder="Bir şeyler yaz veya video ara..." autocomplete="off">
             <button class="send-btn" onclick="sendMessage()">Gönder</button>
         </div>
     </div>
@@ -80,7 +79,6 @@
         const userInput = document.getElementById('user-input');
         const coinCounter = document.getElementById('coin-counter');
 
-        // --- TEMA VE COIN AYARLARI ---
         function toggleTheme() {
             document.body.classList.toggle('dark-mode');
             const isDark = document.body.classList.contains('dark-mode');
@@ -100,7 +98,6 @@
             localStorage.setItem('remainingCoins', coins);
         }
 
-        // --- MATEMATİK MOTORU ---
         function calculate(input) {
             const mathRegex = /(\d+)\s*([\+\-\*\/x]|artı|eksi|çarpı|bölü)\s*(\d+)/i;
             const match = input.match(mathRegex);
@@ -118,90 +115,73 @@
             return null;
         }
 
-        // --- YENİ: HAVA DURUMU API MOTORU ---
         async function fetchWeather(locationQuery) {
             try {
-                // 1. Geocoding API: İl/İlçe isminden koordinat bulma
                 const geoUrl = `https://geocoding-api.open-meteo.com/v1/search?name=${encodeURIComponent(locationQuery)}&count=1&language=tr&format=json`;
                 const geoRes = await fetch(geoUrl);
                 const geoData = await geoRes.json();
-
-                if (!geoData.results || geoData.results.length === 0) {
-                    return "Üzgünüm, bu bölgeyi haritada bulamadım. 📍";
-                }
-
+                if (!geoData.results || geoData.results.length === 0) return "Üzgünüm, bu bölgeyi haritada bulamadım. 📍";
                 const { latitude, longitude, name, admin1 } = geoData.results[0];
-
-                // 2. Weather API: Koordinatlarla hava durumunu çekme
                 const weatherUrl = `https://api.open-meteo.com/v1/forecast?latitude=${latitude}&longitude=${longitude}&current_weather=true`;
                 const weatherRes = await fetch(weatherUrl);
                 const weatherData = await weatherRes.json();
-
                 const temp = weatherData.current_weather.temperature;
                 const code = weatherData.current_weather.weathercode;
-
-                // Basit hava durumu kodu yorumlama
                 let status = "Açık";
                 if (code > 0 && code < 4) status = "Parçalı Bulutlu";
                 if (code >= 45 && code <= 48) status = "Sisli";
                 if (code >= 51 && code <= 67) status = "Yağmurlu";
                 if (code >= 71 && code <= 77) status = "Karlı";
                 if (code >= 80) status = "Sağanak Yağışlı";
-
                 return `<b>${name} (${admin1})</b> için anlık hava durumu:<br>🌡️ Sıcaklık: <b>${temp}°C</b><br>☁️ Durum: <b>${status}</b>`;
-            } catch (error) {
-                return "Hava durumu servisine şu an bağlanamıyorum. 📡";
-            }
+            } catch (error) { return "Hava durumu servisine şu an bağlanamıyorum. 📡"; }
         }
 
-        // --- GELİŞTİRİLMİŞ CEVAP MOTORU ---
         async function getResponse(text) {
             const low = text.toLowerCase();
 
-            // 1. Hava Durumu Kontrolü (Hava kelimesi geçiyorsa)
-            if (low.includes("hava") || low.includes("durumu")) {
-                const query = text.replace(/hava|durumu|nedir|kaç/gi, "").trim();
-                if (query.length > 2) {
-                    return await fetchWeather(query);
+            // 1. YouTube Kontrolü (YENİ)
+            if (low.includes("youtube") || low.includes("video") || low.includes("izle")) {
+                const query = text.replace(/youtube|video|izle|ara|bul|nedir/gi, "").trim();
+                if (query.length > 0) {
+                    const searchUrl = `https://www.youtube.com/results?search_query=${encodeURIComponent(query)}`;
+                    return `Senin için YouTube'da <b>"${query}"</b> araması yaptım: <br><br> <a href="${searchUrl}" target="_blank" style="color: #ff0000; text-decoration: none; font-weight: bold;">▶️ Videoyu YouTube'da Gör</a>`;
                 } else {
-                    return "Hangi il veya ilçenin hava durumunu öğrenmek istersin? (Örn: Hava İstanbul)";
+                    return `YouTube'da ne izlemek istersin? <br><br> <a href="https://www.youtube.com" target="_blank" style="color: #ff0000; text-decoration: none; font-weight: bold;">📺 YouTube'a Git</a>`;
                 }
             }
 
-            // 2. Kaan Özkan ve Şirket
-            if (low.includes("kaan özkan kim")) {
-                return "<b>KAAN ÖZKAN</b> Kaningo Games Software Company'nin kurucusu ve baş geliştiricisidir. Kendisi benim de yaratıcım ve geliştiricim olur! Müthiş bir vizyonu vardır. 😎";
-            }
-            if (low.includes("yapımcı") || low.includes("geliştirici")) {
-                return "Ben <b>Kaningo Games Software Company tarafından geliştirildim. Ekibimizin CTO'su, Kurucu Ortağı Kaan Özkan; CEO'su, Kurucu Ortağı Anıl Demirel'dir..";
+            // 2. Hava Durumu
+            if (low.includes("hava") || low.includes("durumu")) {
+                const query = text.replace(/hava|durumu|nedir|kaç/gi, "").trim();
+                if (query.length > 2) return await fetchWeather(query);
+                else return "Hangi il veya ilçenin hava durumunu öğrenmek istersin?";
             }
 
-            // 3. Matematik
+            // 3. Kaan Özkan ve Şirket
+            if (low.includes("kaan özkan kim")) return "<b>KAAN ÖZKAN</b> Kaningo Games Software Company'nin kurucusu ve baş geliştiricisidir. Kendisi benim de yaratıcım! 😎";
+            if (low.includes("yapımcı") || low.includes("geliştirici")) return "Ben <b>Kaningo Games</b> tarafından geliştirildim. Liderimiz Kaan Özkan, CEO'muz Anıl Demirel'dir.";
+
+            // 4. Matematik
             const math = calculate(low);
             if (math) return math;
 
-            // 4. Selamlaşma / İsim
-            if (low.includes("merhaba") || low.includes("selam")) {
-                return `Selamlar ${userName || ''}! Ben Kon.AI. Sana nasıl yardımcı olabilirim?`;
-            }
+            // 5. Selamlaşma / İsim
+            if (low.includes("merhaba") || low.includes("selam")) return `Selamlar ${userName || ''}! Ben Kon.AI. Sana nasıl yardımcı olabilirim?`;
             if (low.includes("adım") || low.includes("ismim")) {
                 const parts = text.split(" ");
                 userName = parts[parts.length - 1].replace(/[.!?]/g, "");
                 localStorage.setItem('konai_name', userName);
-                return `Memnun oldum ${userName}! Hafızama kaydettim. 😉`;
+                return `Memnun oldum ${userName}! 😉`;
             }
 
-            return "Bunu tam anlayamadım ama istersen matematik çözebilirim veya hava durumunu sorabilirsin!";
+            return "Bunu tam anlayamadım ama matematik çözebilirim, hava durumuna bakabilirim veya YouTube'da video arayabilirim!";
         }
 
-        // --- MESAJ GÖNDERME (ASENKRON) ---
         async function sendMessage() {
             const text = userInput.value.trim();
             if (!text) return;
-            if (coins <= 0) {
-                addMsg("Bugünlük coin limitin doldu!", 'bot-msg');
-                return;
-            }
+            if (coins <= 0) { addMsg("Bugünlük coin limitin doldu!", 'bot-msg'); return; }
 
             addMsg(text, 'user-msg');
             userInput.value = '';
@@ -209,8 +189,6 @@
             updateCoins();
 
             document.getElementById('typing').style.display = 'block';
-            
-            // Cevabı asenkron olarak bekle
             const resp = await getResponse(text);
             
             setTimeout(() => {
@@ -227,7 +205,7 @@
             chatWindow.scrollTop = chatWindow.scrollHeight;
         }
 
-        if(userName) document.getElementById('welcome-msg').innerHTML = `Hoş geldin ${userName}! Bugün hava durumunu mu merak ediyorsun?`;
+        if(userName) document.getElementById('welcome-msg').innerHTML = `Hoş geldin ${userName}! Bugün ne izlemek veya ne sormak istersin?`;
         updateCoins();
         userInput.addEventListener("keypress", (e) => { if (e.key === "Enter") sendMessage(); });
     </script>
